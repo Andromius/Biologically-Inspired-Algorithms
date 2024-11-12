@@ -1,0 +1,11 @@
+import numpy as np
+
+RASTRIGIN = (-5.12, 5.12)
+SPHERE = (-5.12, 5.12)
+SCHWEFEL = (-500, 500)
+ROSENBROCK = (-5, 10)
+ZAKHAROV = (-5, 10)
+GRIEWANGK = (-600, 600)
+LEVY = (-10, 10)
+MICHALEWICZ = (0, np.pi)
+ACKLEY = (-32.768, 32.768)
