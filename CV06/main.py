@@ -13,7 +13,18 @@ INERTIA_WEIGHT_S = 0.9
 INERTIA_WEIGHT_E = 0.4
 MIN_VELOCITY = -10
 MAX_VELOCITY = 10
-bounds = constants.GRIEWANGK
+bounds = constants.SCHWEFEL
+objective_function = animation_students.schwefel
+
+def generate_swarm(count: int, dimensions: int, bounds: tuple):
+  matrix = np.zeros((count, 3), dtype=object)  # Use object dtype to store arrays
+
+  for i in range(count):
+    array1 = np.random.uniform(low=bounds[0], high=bounds[1], size=dimensions)
+    array2 = np.random.uniform(MIN_VELOCITY, MAX_VELOCITY, size=dimensions)
+    matrix[i] = (array1, array2, array1.copy())
+
+  return matrix
 
 def get_best_from_swarm(swarm, objective_function: callable):
     evaluations = np.apply_along_axis(objective_function, axis=1, arr=np.vstack(swarm[:,2]))
@@ -26,7 +37,7 @@ def calculate_inertia_weight(current_migration: int):
     term = np.divide(numerator, MAX_MIGRATIONS)
     return np.subtract(INERTIA_WEIGHT_S, term)
 
-def calculate_new_velocity(particle: NDArray[np.float64], current_migration: int, global_best_solution: NDArray[np.float64]):
+def calculate_new_velocity(particle: NDArray[np.float64], current_migration: int):
     r1 = np.random.uniform()
     inertia_weight = calculate_inertia_weight(current_migration)
     particle[1] *= inertia_weight
@@ -40,33 +51,13 @@ def calculate_new_position(particle: NDArray[np.float64]):
    particle[0] = np.clip(particle[0], bounds[0], bounds[1])
    return particle
 
-def evaluate_personal_best(personal_best: NDArray[np.float64], objective_function: callable):
-    return objective_function(personal_best)
-
 def evaluate_new_position(particle: NDArray[np.float64], objective_function: callable):
     value = objective_function(particle[0])
     if value < objective_function(particle[2]):
         particle[2] = particle[0].copy()
     return value
 
-def update_particle(particle: NDArray[np.float64], current_migration: int, global_best_solution: NDArray[np.float64], objective_function: callable):
-    calculate_new_velocity(particle, current_migration, global_best_solution)
-    calculate_new_position(particle)
-    return evaluate_new_position(particle, objective_function)
 
-def generate_swarm(count: int, dimensions: int, bounds: tuple):
-  matrix = np.zeros((count, 3), dtype=object)  # Use object dtype to store arrays
-
-  for i in range(count):
-    array1 = np.random.uniform(low=bounds[0], high=bounds[1], size=dimensions)
-    array2 = np.random.uniform(MIN_VELOCITY, MAX_VELOCITY, size=dimensions)
-    matrix[i] = (array1, array2, array1.copy())
-
-  return matrix
-
-objective_function = animation_students.griewangk
-
-#current_migration = 0
 swarm = generate_swarm(SWARM_SIZE, DIMENSIONS, bounds)
 global_best_solution, global_best_value = get_best_from_swarm(swarm, objective_function)
 
@@ -74,12 +65,15 @@ xy_values = []
 z_values = []
 start = time()
 for current_migration in range(MAX_MIGRATIONS):
-    new_position_evaluations = np.apply_along_axis(update_particle, 1, swarm, current_migration, global_best_solution, objective_function)
-    candidate_global_best_value = np.min(new_position_evaluations)
-    if candidate_global_best_value < global_best_value:
-        global_best_value = candidate_global_best_value
-        global_best_solution = swarm[np.argmin(new_position_evaluations), 2].copy()
-    #current_migration += 1
+    new_position_evaluations = []
+    for i, particle in enumerate(swarm):
+        calculate_new_velocity(particle, current_migration)
+        calculate_new_position(particle)
+        value = evaluate_new_position(particle, objective_function)
+        if value < global_best_value:
+            global_best_value = value
+            global_best_solution = particle[0].copy()
+        new_position_evaluations.append(value)
     xy_values.append(np.vstack(swarm[:, 0]))
     z_values.append(new_position_evaluations)
 
