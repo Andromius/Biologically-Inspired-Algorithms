@@ -32,6 +32,7 @@ def calculate_new_position(individual: NDArray[np.float64], leader: NDArray[np.f
         return candidate_pos_individual
     return individual
 
+
 population = generate_swarm()
 global_best_solution = get_best_from_population(population)
 
@@ -39,16 +40,17 @@ migrations_xy_values = []
 migrations_xy_values.append(np.vstack(deepcopy(population)))
 migrations_z_values = []
 start = time()
+
 for _ in range(MAX_MIGRATIONS):
     t = 0
     while t <= PATH_LENGTH:
-        population = np.apply_along_axis(calculate_new_position, axis=1, arr=np.vstack(population), leader=global_best_solution, t=t)
+        for idx, individual in enumerate(population):
+            population[idx] = calculate_new_position(individual, global_best_solution, t)
         t += STEP
-        migrations_xy_values.append(population)
+        migrations_xy_values.append(deepcopy(population))
     global_best_solution = get_best_from_population(population)
 
 print(f'Elapsed: {time() - start}')
-
 X, Y, Z = animation_students.make_surface(min=BOUNDS[0], max=BOUNDS[1], function=OBJECTIVE_FUNCTION, step=BOUNDS[1]*0.05)
 for migration_xy_value in migrations_xy_values:
     migrations_z_values.append(np.apply_along_axis(OBJECTIVE_FUNCTION, axis=1, arr=migration_xy_value))
