@@ -25,14 +25,6 @@ def get_best_from_population(population):
     min_idx = np.argmin(evaluations)
     return population[min_idx].copy()
 
-def calculate_new_position(individual: NDArray[np.float64], leader: NDArray[np.float64], t: float):
-    prt_vector = np.array([1 if np.random.uniform() < PRT_THRESHOLD else 0 for _ in range(DIMENSIONS)])
-    candidate_pos_individual = np.clip(individual + (leader - individual) * t * prt_vector, BOUNDS[0], BOUNDS[1])
-    if OBJECTIVE_FUNCTION(candidate_pos_individual) < OBJECTIVE_FUNCTION(individual):
-        return candidate_pos_individual
-    return individual
-
-
 population = generate_swarm()
 global_best_solution = get_best_from_population(population)
 
@@ -42,12 +34,20 @@ migrations_z_values = []
 start = time()
 
 for _ in range(MAX_MIGRATIONS):
-    t = 0
-    while t <= PATH_LENGTH:
-        for idx, individual in enumerate(population):
-            population[idx] = calculate_new_position(individual, global_best_solution, t)
-        t += STEP
-        migrations_xy_values.append(deepcopy(population))
+    new_pop = []
+    for idx, individual in enumerate(population):
+        start_individual = individual.copy()
+        current_best = start_individual
+        t = 0
+        while t <= PATH_LENGTH:
+            prt_vector = np.random.rand(DIMENSIONS) < PRT_THRESHOLD
+            candidate_pos_individual = np.clip(individual + (global_best_solution - individual) * t * prt_vector, BOUNDS[0], BOUNDS[1])
+            if OBJECTIVE_FUNCTION(candidate_pos_individual) < OBJECTIVE_FUNCTION(current_best):
+                current_best = candidate_pos_individual
+            t += STEP
+        new_pop.append(current_best)
+    population = new_pop
+    migrations_xy_values.append(np.vstack(deepcopy(population)))
     global_best_solution = get_best_from_population(population)
 
 print(f'Elapsed: {time() - start}')
