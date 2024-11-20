@@ -38,12 +38,15 @@ for _ in range(MAX_MIGRATIONS):
     for idx, individual in enumerate(population):
         start_individual = individual.copy()
         current_best = start_individual
+        current_best_val = OBJECTIVE_FUNCTION(current_best)
         t = 0
         while t <= PATH_LENGTH:
             prt_vector = np.random.rand(DIMENSIONS) < PRT_THRESHOLD
             candidate_pos_individual = np.clip(individual + (global_best_solution - individual) * t * prt_vector, BOUNDS[0], BOUNDS[1])
-            if OBJECTIVE_FUNCTION(candidate_pos_individual) < OBJECTIVE_FUNCTION(current_best):
+            candidate_val = OBJECTIVE_FUNCTION(candidate_pos_individual)
+            if candidate_val < current_best_val:
                 current_best = candidate_pos_individual
+                current_best_val = candidate_val 
             t += STEP
         new_pop.append(current_best)
     population = new_pop
