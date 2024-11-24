@@ -120,39 +120,41 @@ def get_best_solution_from_population(population: list[list], distances: list):
     best.append(best[0])
     return best
 
-individual_count = 100
-generation_count = 1000
-city_count = 20
+
+if __name__ == '__main__':
+    individual_count = 100
+    generation_count = 1000
+    city_count = 20
 
 
-start = time.time()
-cities = generate_cities(city_count)
-distance_matrix = calculate_distance_matrix(cities)
-population = generate_individuals(individual_count, city_count)
+    start = time.time()
+    cities = generate_cities(city_count)
+    distance_matrix = calculate_distance_matrix(cities)
+    population = generate_individuals(individual_count, city_count)
 
-best_solutions = []
-best_solutions.append(get_best_solution_from_population(population, evaluate_population(population, distance_matrix)))
+    best_solutions = []
+    best_solutions.append(get_best_solution_from_population(population, evaluate_population(population, distance_matrix)))
 
-printProgress(0, generation_count)
-for i in range(generation_count):
-    new_population = population.copy()
-    for j in range(individual_count):
-        parent_A = population[j]
-        parent_B = choose_random_individual(population, parent_A)
-        offspring_AB = crossover(parent_A, parent_B)
-        if np.random.uniform() < 0.5:
-            mutate(offspring_AB)
-        
-        if compute_distance(offspring_AB, distance_matrix) < compute_distance(parent_A, distance_matrix):
-            new_population[j] = offspring_AB
-    population = new_population
+    printProgress(0, generation_count)
+    for i in range(generation_count):
+        new_population = population.copy()
+        for j in range(individual_count):
+            parent_A = population[j]
+            parent_B = choose_random_individual(population, parent_A)
+            offspring_AB = crossover(parent_A, parent_B)
+            if np.random.uniform() < 0.5:
+                mutate(offspring_AB)
+            
+            if compute_distance(offspring_AB, distance_matrix) < compute_distance(parent_A, distance_matrix):
+                new_population[j] = offspring_AB
+        population = new_population
 
-    best = get_best_solution_from_population(population, evaluate_population(population, distance_matrix))
-    if best not in best_solutions:
-        best_solutions.append(best)
-    printProgress(i, generation_count)
+        best = get_best_solution_from_population(population, evaluate_population(population, distance_matrix))
+        if best not in best_solutions:
+            best_solutions.append(best)
+        printProgress(i, generation_count)
 
-printProgress(generation_count, generation_count)
-print(f"Elapsed: {time.time() - start}")
-input()
-animate_connections(np.array(cities), best_solutions, distance_matrix)
+    printProgress(generation_count, generation_count)
+    print(f"Elapsed: {time.time() - start}")
+    input()
+    animate_connections(np.array(cities), best_solutions, distance_matrix)
