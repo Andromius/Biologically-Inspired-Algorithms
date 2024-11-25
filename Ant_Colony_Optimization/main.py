@@ -1,4 +1,4 @@
-from CV04.main import generate_cities, calculate_distance_matrix, compute_distance
+from Genetic_Algorithm.main import generate_cities, calculate_distance_matrix, compute_distance
 import numpy as np
 from numpy.typing import NDArray
 import matplotlib.pyplot as plt
