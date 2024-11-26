@@ -13,6 +13,24 @@ NUM_MIGRATIONS = 200
 VAPORIZATION_COEFFICIENT = 0.5
 Q = 1
 
+import matplotlib.pyplot as plt
+
+def plot_distance_evolution(distances):
+    plt.figure(figsize=(10, 5))
+    plt.plot(distances, color='orange', linestyle='-')
+    
+    # Highlight minimum value
+    min_distance = min(distances)
+    min_index = distances.index(min_distance)
+    plt.scatter(min_index, min_distance, color='red', label=f'Min: {min_distance:.2f}\nIdx: {min_index}')
+    
+    plt.title("Evolution of Distance Over Generations")
+    plt.xlabel("Change of length over generations")
+    plt.ylabel("Distance")
+    plt.legend()
+    plt.grid(True)
+
+
 def animate_connections(points, connection_orders, distances, best_idx, title="ACO TSP"):
     """
     Creates an animation of scatter points connected by lines based on given connection orders.
@@ -49,7 +67,7 @@ def animate_connections(points, connection_orders, distances, best_idx, title="A
     
     # Create the animation
     ani = FuncAnimation(fig, update, frames=len(connection_orders), repeat=False, interval=10)
-    plt.show()
+    return ani
 
 def calculate_visibility_matrix(distance_matrix: NDArray[np.float64]):
     shape = distance_matrix.shape[0]
@@ -127,4 +145,6 @@ for migration in range(NUM_MIGRATIONS):
 solutions.append(best_solution)
 distances.append(best_distance)
 print(f"Elapsed: {time.time() - start}")
-animate_connections(np.array(cities), solutions, distances, best_idx)
+animation = animate_connections(np.array(cities), solutions, distances, best_idx)
+plot_distance_evolution(distances[:-1])
+plt.show()
