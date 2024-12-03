@@ -13,8 +13,6 @@ NUM_MIGRATIONS = 200
 VAPORIZATION_COEFFICIENT = 0.5
 Q = 1
 
-import matplotlib.pyplot as plt
-
 def plot_distance_evolution(distances):
     plt.figure(figsize=(10, 5))
     plt.plot(distances, color='orange', linestyle='-')
@@ -29,7 +27,6 @@ def plot_distance_evolution(distances):
     plt.ylabel("Distance")
     plt.legend()
     plt.grid(True)
-
 
 def animate_connections(points, connection_orders, distances, best_idx, title="ACO TSP"):
     """
@@ -51,9 +48,9 @@ def animate_connections(points, connection_orders, distances, best_idx, title="A
     def update(frame):
         ax.clear()
         if frame == len(connection_orders) - 1:
-            ax.set_title(f"Best migration: {best_idx + 1} Distance: {distances[frame]:.2f}")
+            ax.set_title(f"Best migration: {best_idx} Distance: {distances[frame]:.2f}")
         else:
-            ax.set_title(f"Migration: {frame + 1} Distance: {distances[frame]:.2f}")
+            ax.set_title(f"Migration: {frame} Distance: {distances[frame]:.2f}")
         ax.set_xlabel("X-axis")
         ax.set_ylabel("Y-axis")
         
@@ -66,7 +63,7 @@ def animate_connections(points, connection_orders, distances, best_idx, title="A
         ax.plot(ordered_points[:, 0], ordered_points[:, 1], color='orange', linestyle='-', linewidth=2)
     
     # Create the animation
-    ani = FuncAnimation(fig, update, frames=len(connection_orders), repeat=False, interval=10)
+    ani = FuncAnimation(fig, update, frames=len(connection_orders), repeat=False, interval=50)
     return ani
 
 def calculate_visibility_matrix(distance_matrix: NDArray[np.float64]):
