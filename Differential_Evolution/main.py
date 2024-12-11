@@ -38,6 +38,56 @@ def generate_individuals(count: int, bounds: tuple, dimensions: int):
     return individuals
 
 
+def do_DE(dimensions, swarm_size, max_migrations, max_ofe, objective_function, bounds):
+    dimensions = dimensions
+    func = (bounds, objective_function)
+    population = generate_individuals(count=swarm_size, bounds=func[0], dimensions=dimensions)
+
+    best_solutions = []
+    best_values = []
+    current_generation = 0
+    max_generations = max_migrations
+    scaling_factor = 0.5
+    crossover_range = 0.9
+
+    best_solution, best_value = get_best_solution_from_population(population, func[1])
+    num_ofe = swarm_size
+    best_solutions.append(best_solution)
+    best_values.append(best_value)
+
+    while current_generation < max_generations:
+        new_population = deepcopy(population)
+        for i, individual in enumerate(population):
+            r1, r2, r3 = np.random.choice([index for index in range(len(population)) if index != i], 3, replace=False)
+            mutation_vector = np.clip(np.subtract(population[r1], population[r2]) * scaling_factor + population[r3], func[0][0], func[0][1])
+            trial_vector = np.zeros(dimensions)
+            j_rnd = np.random.randint(0, dimensions)
+
+            for j in range(dimensions):
+                if np.random.uniform() < crossover_range or j == j_rnd:
+                    trial_vector[j] = mutation_vector[j]
+                else:
+                    trial_vector[j] = individual[j]
+
+            trial_vector_value = func[1](trial_vector)
+            num_ofe += 1
+            if num_ofe >= max_ofe:
+                return best_value
+
+            if trial_vector_value <= func[1](individual):
+                new_population[i] = trial_vector
+            population = new_population
+            num_ofe += 1
+            if num_ofe >= max_ofe:
+                return best_value
+        
+        best_solution, best_value = get_best_solution_from_population(population, func[1])
+        num_ofe += swarm_size
+        if num_ofe >= max_ofe:
+            return best_value
+        
+        current_generation += 1
+
 if __name__ == '__main__':
     dimensions = 2
     func = (SCHWEFEL, schwefel)
