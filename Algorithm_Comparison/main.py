@@ -6,6 +6,7 @@ from Differential_Evolution.main import do_DE
 import pandas as pd
 import Differential_Evolution.constants as cons
 import CV01.animation_students as anim
+from time import time
 
 
 values = []
@@ -15,11 +16,14 @@ max_ofe = 3000
 num_experiments = 30
 objective_function = anim.schwefel
 bounds = cons.SCHWEFEL
+deltas = []
 
 for algorithm in [do_PSO, do_FA, do_TLBO, do_SOMA, do_DE]:
     results = []
+    start = time()
     for experiment in range(num_experiments):
         results.append(algorithm(dimensions, pop_size, 9999, max_ofe, objective_function, bounds))
+    deltas.append(time() - start)
     values.append(results)
     print("Next..")
 
@@ -38,7 +42,7 @@ std_devs = df.std()
 
 df.loc['Mean'] = means
 df.loc['Std_Dev'] = std_devs
-
+df.loc['Delta'] = deltas
 
 excel_file = "algo_comp_output.xlsx"
 df.to_excel(excel_file, index=True)
